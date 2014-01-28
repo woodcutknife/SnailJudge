@@ -1,5 +1,5 @@
-executor : main.o logger.o compiler.o monitor.o
-	g++ --std=c++0x -O2 -o executor main.o logger.o compiler.o monitor.o
+executor.out : main.o logger.o compiler.o monitor.o
+	g++ --std=c++0x -O2 -o executor.out main.o logger.o compiler.o monitor.o
 
 main.o : main.cpp
 	g++ --std=c++0x -O2 -c main.cpp

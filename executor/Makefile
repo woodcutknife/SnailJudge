@@ -14,4 +14,4 @@ monitor.o : monitor.cpp monitor.h
 	g++ --std=c++0x -O2 -c monitor.cpp
 
 clean :
-	rm executor main.o logger.o compiler.o monitor.o
+	rm executor.out main.o logger.o compiler.o monitor.o

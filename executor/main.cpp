@@ -87,6 +87,8 @@ int main(int argc, char* argv[]) {
             syscall_cnt,
             safe_files
            );
-            
+
+    system("rm Main Main.o");
+
     return 0;
 }

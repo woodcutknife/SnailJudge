@@ -29,7 +29,10 @@ inline long str2l(const char *str) {
 //                   [ --time_limit=1000 ] [ --memory_limit=256 ] [ --output_limit=10 ] 
 //                   [ --input_file=_.in ] [ --output_file=_.out ]
 //                   [ --log_file=log ]
+//                   [ --compile?=true ]
 int main(int argc, char* argv[]) {
+    string path = argv[0];
+    path = path.substr(0, path.find_last_of('/') + 1);
     string file_name = argv[1];
     string lang = argv[2];
     unordered_map<string, string> args;
@@ -39,22 +42,25 @@ int main(int argc, char* argv[]) {
     args["input_file"] = "_.in";
     args["output_file"] = "_.out";
     args["log_file"] = "log";
+    args["compile?"] = "true";
     for (int i = 3; i < argc; ++ i)
         args[getKey(argv[i], 2)] = getValue(argv[i]);
 
     unordered_map<string, string> compile_commands;
     ifstream compile_ini;
-    compile_ini.open("compiler.ini", ios_base::in);
+    compile_ini.open(path + "compiler.ini", ios_base::in);
     for (string s; getline(compile_ini, s); compile_commands[getKey(s)] = getValue(s));
     compile_ini.close();
 
     SnailJudgeExecutor::FileLogger logger(args["log_file"]);
 
-    int compile_return_code = SnailJudgeExecutor::compile(
-            compile_commands[lang], file_name, logger);
-    if (compile_return_code != 0) {
-        logger.log("Result", {"Compile_Error"});
-        return 1;
+    if (args["compile?"] == "true") {
+        int compile_return_code = SnailJudgeExecutor::compile(
+                compile_commands[lang], file_name, logger);
+        if (compile_return_code != 0) {
+            logger.log("Result", {"Compile_Error"});
+            return 1;
+        }
     }
 
     int time_limit = str2l(args["time_limit"].c_str());
@@ -63,7 +69,7 @@ int main(int argc, char* argv[]) {
 
     vector<int> syscall_cnt;
     ifstream syscall_ini;
-    syscall_ini.open("syscall_ini/" + lang + ".ini", ios_base::in);
+    syscall_ini.open(path + "syscall_ini/" + lang + ".ini", ios_base::in);
     int size;
     syscall_ini >> size;
     syscall_cnt.resize(size, 0);
@@ -72,7 +78,7 @@ int main(int argc, char* argv[]) {
 
     vector<string> safe_files;
     ifstream safe_files_ini;
-    safe_files_ini.open("safe_files_ini/" + lang + ".ini", ios_base::in);
+    safe_files_ini.open(path + "safe_files_ini/" + lang + ".ini", ios_base::in);
     for (string s; safe_files_ini >> s; safe_files.push_back(s));
     safe_files_ini.close();
 
@@ -87,8 +93,6 @@ int main(int argc, char* argv[]) {
             syscall_cnt,
             safe_files
            );
-
-    system("rm Main Main.o");
 
     return 0;
 }

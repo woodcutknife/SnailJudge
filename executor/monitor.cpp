@@ -7,6 +7,7 @@
 #include <vector>
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 #include "logger.h"
 #include "monitor.h"
 
@@ -38,14 +39,22 @@ namespace SnailJudgeExecutor {
         return res;
     }
 
+    inline unsigned long getOrigRax(struct user_regs_struct *regs) {
+        return regs->orig_rax;
+    }
+
+    inline unsigned long getRdi(struct user_regs_struct *regs) {
+        return regs->rdi;
+    }
+
     void monitor(const char *exe, int time_limit, int memory_limit, int output_limit, const char *input_file, const char *output_file, Logger &logger, vector<int> syscall_cnt, const vector<string> safe_files) {
         pid_t pid = fork();
         if (pid == 0) {
             freopen(input_file, "r", stdin);
             freopen(output_file, "w", stdout);
-            setLimit(LIM_CPU, (rlim_t)(time_limit / 1000 + 1), (rlim_t)(time_limit / 1000 + 1));
-            setLimit(LIM_AS, (rlim_t)(memory_limit * 1024 * 1024), (rlim_t)(memory_limit * 1024 * 1024));
-            setLimit(LIM_FSIZE, (rlim_t)(output_limit * 1024 * 1024), (rlim_t)(output_limit * 1024 * 1024));
+            setLimit(LIM_CPU, (rlim_t)time_limit, (rlim_t)time_limit);
+            setLimit(LIM_AS, (rlim_t)memory_limit, (rlim_t)(memory_limit + MEM_THAT_NEED * 1024));
+            setLimit(LIM_FSIZE, (rlim_t)output_limit, (rlim_t)output_limit);
             ptrace(PTRACE_TRACEME, 0, NULL, NULL);
             execl(exe, exe, NULL);
         }
@@ -66,7 +75,7 @@ namespace SnailJudgeExecutor {
                     struct rusage usage;
                     getrusage(RUSAGE_CHILDREN, &usage);
                     logger.log("Time", {ltostr(usage.ru_utime.tv_sec * 1000 + usage.ru_utime.tv_usec / 1000)});
-                    logger.log("Memory", {ltostr(usage.ru_maxrss)});
+                    logger.log("Memory", {ltostr(usage.ru_maxrss - MEM_THAT_NEED)});
                     break;
                 }
                 if (WSTOPSIG(wait_val) != SIGTRAP) {
@@ -84,6 +93,38 @@ namespace SnailJudgeExecutor {
                     ptrace(PTRACE_KILL, pid, NULL, NULL);
                     continue;
                 }
+                struct user_regs_struct regs;
+                ptrace(PTRACE_GETREGS, pid, NULL, &regs);
+                unsigned long orig_rax = getOrigRax(&regs);
+                if (orig_rax >= syscall_cnt.size() || syscall_cnt[orig_rax] == 0) {
+                    logger.log("Result", {"Runtime_Error"});
+                    normal_exit = false;
+                    ptrace(PTRACE_KILL, pid, NULL, NULL);
+                    continue;
+                }
+                -- syscall_cnt[orig_rax];
+                if (orig_rax == __NR_open || orig_rax == __NR_access) {
+                    unsigned long rdi = getRdi(&regs);
+                    long buf[32];
+                    for (int i = 0; i < 30; ++ i) {
+                        buf[i] = ptrace(PTRACE_PEEKDATA, pid, rdi + (unsigned long)i * sizeof(unsigned long), NULL);
+                    }
+                    buf[30] = -1;
+                    buf[31] = 0;
+                    bool is_safe = false;
+                    for (const auto &s: safe_files)
+                        if (strcmp(s.c_str(), (char*)buf)) {
+                            is_safe = true;
+                            break;
+                        }
+                    if (!is_safe) {
+                        logger.log("Result", {"Runtime_Error"});
+                        normal_exit = false;
+                        ptrace(PTRACE_KILL, pid, NULL, NULL);
+                        continue;
+                    }
+                }
+                ptrace(PTRACE_SYSCALL, pid, NULL, NULL);
             }
         }
     }

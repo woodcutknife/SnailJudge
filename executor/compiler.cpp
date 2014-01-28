@@ -12,7 +12,7 @@ namespace SnailJudgeExecutor {
         int return_code = system(compile_command.c_str());
         vector<string> info;
         ifstream tmp(".compile_info", ios_base::in);
-        for (string s; tmp >> s; info.push_back(s));
+        for (string s; getline(tmp, s); info.push_back(s));
         tmp.close();
         system("rm .compile_info");
         logger.log("Compile Info", info);

@@ -29,7 +29,7 @@ inline long str2l(const char *str) {
 //                   [ --time_limit=1000 ] [ --memory_limit=256 ] [ --output_limit=10 ] 
 //                   [ --input_file=_.in ] [ --output_file=_.out ]
 //                   [ --log_file=log ]
-//                   [ --compile?=true ]
+//                   [ --only_compile?=false ] [ --not_compile?=false ]
 int main(int argc, char* argv[]) {
     string path = argv[0];
     path = path.substr(0, path.find_last_of('/') + 1);
@@ -42,7 +42,8 @@ int main(int argc, char* argv[]) {
     args["input_file"] = "_.in";
     args["output_file"] = "_.out";
     args["log_file"] = "log";
-    args["compile?"] = "true";
+    args["only_compile?"] = "false";
+    args["not_compile?"] = "false";
     for (int i = 3; i < argc; ++ i)
         args[getKey(argv[i], 2)] = getValue(argv[i]);
 
@@ -54,14 +55,15 @@ int main(int argc, char* argv[]) {
 
     SnailJudgeExecutor::FileLogger logger(args["log_file"]);
 
-    if (args["compile?"] == "true") {
+    if (args["not_compile?"] == "false") {
         int compile_return_code = SnailJudgeExecutor::compile(
-                compile_commands[lang], file_name, logger);
+                lang, compile_commands[lang], file_name, logger);
         if (compile_return_code != 0) {
             logger.log("Result", {"Compile_Error"});
             return 1;
         }
     }
+    if (args["only_compile?"] == "true") return 0;
 
     int time_limit = str2l(args["time_limit"].c_str());
     int memory_limit = str2l(args["memory_limit"].c_str());

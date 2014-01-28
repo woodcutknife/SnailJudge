@@ -3,3 +3,6 @@
 
 # Executables
 *.out
+
+# Datas and Checkers
+data/*

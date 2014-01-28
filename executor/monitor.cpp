@@ -53,7 +53,7 @@ namespace SnailJudgeExecutor {
             freopen(input_file, "r", stdin);
             freopen(output_file, "w", stdout);
             setLimit(LIM_CPU, (rlim_t)time_limit, (rlim_t)time_limit);
-            setLimit(LIM_AS, (rlim_t)memory_limit, (rlim_t)(memory_limit + MEM_THAT_NEED * 1024));
+            setLimit(LIM_AS, (rlim_t)memory_limit, (rlim_t)(memory_limit));
             setLimit(LIM_FSIZE, (rlim_t)output_limit, (rlim_t)output_limit);
             ptrace(PTRACE_TRACEME, 0, NULL, NULL);
             execl(exe, exe, NULL);
@@ -75,7 +75,7 @@ namespace SnailJudgeExecutor {
                     struct rusage usage;
                     getrusage(RUSAGE_CHILDREN, &usage);
                     logger.log("Time", {ltostr(usage.ru_utime.tv_sec * 1000 + usage.ru_utime.tv_usec / 1000)});
-                    logger.log("Memory", {ltostr(usage.ru_maxrss - MEM_THAT_NEED)});
+                    logger.log("Memory", {ltostr(usage.ru_maxrss)});
                     break;
                 }
                 if (WSTOPSIG(wait_val) != SIGTRAP) {

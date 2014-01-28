@@ -9,8 +9,6 @@
 #define LIM_AS 1
 #define LIM_FSIZE 2
 
-#define MEM_THAT_NEED 22324
-
 namespace SnailJudgeExecutor {
     using namespace std;
 

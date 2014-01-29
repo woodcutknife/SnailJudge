@@ -56,13 +56,15 @@ module SnailJudge
               judge_log[:score],
               judge_log[:time],
               judge_log[:memory],
-              judge_log[:test_logs]
+              judge_log[:test_logs],
+              judge_log[:compile_info]
             ]
           else
             judge_val = [
               judge_log[:result],
               judge_log[:time],
-              judge_log[:memory]
+              judge_log[:memory],
+              judge_log[:compile_info]
             ]
           end
           client.puts YAML::dump(judge_val)

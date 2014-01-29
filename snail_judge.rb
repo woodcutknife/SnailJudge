@@ -69,7 +69,9 @@ module SnailJudge
 
           sleep(0.5)
           client.close
-        rescue
+        rescue Exception => e
+          puts "Error: #{e.inspect}"
+          exit(1)
         end
       end
     end

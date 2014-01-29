@@ -15,6 +15,9 @@ module SnailJudge
       judge_log[:time] = 0
       judge_log[:memory] = 0
       judge_log[:score] = 0
+      if judge_log[:result]
+        judge_log[:result] = judge_log[:result][0]
+      end
       if judge_log[:result] == 'Compile_Error'
         return judge_log
       end

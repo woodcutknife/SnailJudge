@@ -22,7 +22,7 @@ module SnailJudge
 
           content = YAML::load(client.recvfrom(131072)[0])
           puzzle_id = content[0]
-          language = content[1]
+          language = SnailJudge::RCV_LANG_HASH[content[1]]
           code = content[2]
           mode = content[3]
 

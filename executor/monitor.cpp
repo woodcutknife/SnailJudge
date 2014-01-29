@@ -113,7 +113,7 @@ namespace SnailJudgeExecutor {
                     buf[31] = 0;
                     bool is_safe = false;
                     for (const auto &s: safe_files)
-                        if (strcmp(s.c_str(), (char*)buf)) {
+                        if (strcmp(s.c_str(), (char*)buf) == 0) {
                             is_safe = true;
                             break;
                         }

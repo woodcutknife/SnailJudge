@@ -11,6 +11,7 @@ namespace SnailJudgeExecutor {
     class Logger {
         public:
             virtual void log(const string &label, const vector<string> &info) = 0;
+            virtual ~Logger() {}
     };
 
     class FileLogger: public Logger {

@@ -82,7 +82,7 @@ end
 
 if __FILE__ == $0
   if $*.size != 1
-    puts 'Usage: ./snail_judge port'
+    puts "Usage: #{__FILE__} port"
     exit(1)
   end
 

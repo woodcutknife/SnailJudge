@@ -49,7 +49,7 @@ module SnailJudge
           end
 
           judge_log = task.judge(src_file_name, language, mode == SnailJudge::MODE_OI)
-          #system('rm', src_file_name)
+          system('rm', src_file_name)
 
           if mode == SnailJudge::MODE_OI
             judge_val = [
